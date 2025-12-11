@@ -3,82 +3,1091 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lestari Nusantara – Energi & Kearifan Lokal</title>
+    <meta name="description" content="Lestari Nusantara - Platform energi terbarukan, kearifan lokal, dan kalkulator jejak karbon Indonesia">
+    <meta name="keywords" content="energi terbarukan, kearifan lokal, kalkulator karbon, peta interaktif, lingkungan Indonesia, eco calculator">
+    <meta name="author" content="Lestari Nusantara">
+    <meta property="og:title" content="Lestari Nusantara - Energi, Kearifan & Eco Calculator">
+    <meta property="og:description" content="Platform lengkap untuk energi terbarukan, kearifan lokal, dan perhitungan jejak karbon Indonesia">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:url" content="https://lestarinusantara.id">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <title>Lestari Nusantara – Energi, Kearifan & Eco Calculator</title>
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="style.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" as="style">
+    
+    <!-- CSS Files -->
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+    
+    <style>
+        /* Critical CSS for above-the-fold content */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #2e7d32, #4caf50, #ff9800);
+            z-index: 10000;
+            transition: width 0.1s;
+        }
+        
+        /* Ensure content is hidden until loaded */
+        .content-hidden {
+            opacity: 0;
+        }
+    </style>
 </head>
 
-<body>
+<body class="content-hidden">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p style="color: white; font-size: 1.2rem; margin-top: 20px;">Memuat Lestari Nusantara...</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
 
     <!-- NAVBAR -->
-    <nav class="navbar">
-        <div class="logo">Lestari Nusantara</div>
-        <div class="menu">
-            <a href="#home">Beranda</a>
-            <a href="#energi">Energi</a>
-            <a href="#kearifan">Kearifan Lokal</a>
-            <a href="#galeri">Galeri</a>
-            <a href="#tentang">Tentang</a>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <i class="fas fa-leaf"></i>
+                    <span>Lestari Nusantara</span>
+                </div>
+                
+                <div class="menu" id="menu">
+                    <a href="#home" class="active"><i class="fas fa-home"></i> Beranda</a>
+                    <a href="#eco-calculator"><i class="fas fa-calculator"></i> Eco Calculator</a>
+                    <a href="#peta-interaktif"><i class="fas fa-map-marked-alt"></i> Peta</a>
+                    <a href="#energi"><i class="fas fa-bolt"></i> Energi</a>
+                    <a href="#kearifan"><i class="fas fa-seedling"></i> Kearifan</a>
+                    <a href="#kontribusi"><i class="fas fa-hand-holding-heart"></i> Kontribusi</a>
+                </div>
+                
+                <div class="nav-right">
+                    <div class="theme-toggle">
+                        <button id="themeToggle" aria-label="Toggle theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <!-- HERO -->
+    <!-- HERO SECTION -->
     <header id="home" class="hero">
-        <div class="overlay"></div>
-        <div class="hero-text">
-            <h1>Energi Bersih, Berakar pada Tradisi Nusantara</h1>
-            <p>Menghubungkan teknologi energi terbarukan dengan kearifan budaya Indonesia.</p>
-            <button onclick="scrollToSection('energi')">Jelajahi Sekarang</button>
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="animate-pop">Membangun <span class="highlight">Indonesia Berkelanjutan</span></h1>
+                <p class="hero-subtitle animate-slide-up">
+                    Sinergi energi terbarukan, kearifan lokal, dan kesadaran lingkungan untuk masa depan yang lebih hijau
+                </p>
+                <div class="hero-buttons animate-fade-in">
+                    <button class="btn-primary" onclick="scrollToSection('eco-calculator')" aria-label="Hitung jejak karbon">
+                        <i class="fas fa-calculator"></i> Hitung Jejak Karbon
+                    </button>
+                    <button class="btn-secondary" onclick="scrollToSection('peta-interaktif')" aria-label="Jelajahi peta">
+                        <i class="fas fa-map"></i> Jelajahi Peta
+                    </button>
+                </div>
+                <div class="hero-stats animate-fade-in-delay">
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="127">0</div>
+                        <div class="stat-label">Proyek Energi</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="48">0</div>
+                        <div class="stat-label">Kearifan Lokal</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="5000">0</div>
+                        <div class="stat-label">Ton CO₂ Berkurang</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="34">0</div>
+                        <div class="stat-label">Provinsi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <a href="#eco-calculator" onclick="scrollToSection('eco-calculator')" aria-label="Scroll ke Eco Calculator">
+                <i class="fas fa-chevron-down bounce"></i>
+            </a>
         </div>
     </header>
 
-    <!-- ENERGI TERBARUKAN -->
-    <section id="energi" class="section">
-        <h2>Energi Terbarukan di Nusantara</h2>
-        <div class="grid" id="energiList"></div>
-    </section>
+    <!-- ECO CALCULATOR SECTION -->
+    <section id="eco-calculator" class="section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <h2>Eco Calculator</h2>
+                <p class="section-subtitle">Hitung dan kurangi jejak karbon Anda untuk Indonesia yang lebih hijau</p>
+            </div>
 
-    <!-- KEARIFAN LOKAL -->
-    <section id="kearifan" class="section alt">
-        <h2>Kearifan Lokal</h2>
-        <div class="grid" id="kearifanList"></div>
-    </section>
+            <div class="calculator-container">
+                <div class="calculator-tabs">
+                    <button class="calc-tab active" data-tab="personal" onclick="switchCalcTab('personal')" aria-label="Kalkulator personal">
+                        <i class="fas fa-user"></i> Personal
+                    </button>
+                    <button class="calc-tab" data-tab="household" onclick="switchCalcTab('household')" aria-label="Kalkulator rumah tangga">
+                        <i class="fas fa-home"></i> Rumah Tangga
+                    </button>
+                    <button class="calc-tab" data-tab="transport" onclick="switchCalcTab('transport')" aria-label="Kalkulator transportasi">
+                        <i class="fas fa-car"></i> Transportasi
+                    </button>
+                    <button class="calc-tab" data-tab="energy" onclick="switchCalcTab('energy')" aria-label="Kalkulator energi">
+                        <i class="fas fa-bolt"></i> Konsumsi Energi
+                    </button>
+                </div>
 
-    <!-- GALERI -->
-    <section id="galeri" class="section">
-        <h2>Galeri Nusantara</h2>
-        <div class="gallery">
-            <img src="c:\Users\Lenovo\Downloads\5c71304ed383cff88101f9b8b00662f3 (1).jpg">
-            <img src="c:\Users\Lenovo\Downloads\OIP (1).jpg">
-            <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80">
-            <img src="c:\Users\Lenovo\Downloads\OIP (2).jpg">
-            <img src="c:\Users\Lenovo\Downloads\7_-_1001indonesianet.jpg">
+                <div class="calculator-content">
+                    <!-- Personal Carbon Calculator -->
+                    <div class="calc-tab-content active" id="personal-calc">
+                        <div class="calc-form">
+                            <h3><i class="fas fa-user-circle"></i> Jejak Karbon Personal</h3>
+                            <p>Hitung jejak karbon dari aktivitas harian Anda</p>
+                            
+                            <div class="form-group">
+                                <label for="electricity">
+                                    <i class="fas fa-plug"></i> Konsumsi Listrik Bulanan
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="electricity" min="0" step="10" value="200" aria-label="Konsumsi listrik bulanan dalam kWh">
+                                    <span class="unit">kWh</span>
+                                </div>
+                                <div class="input-info">
+                                    Rata-rata rumah tangga Indonesia: 900 kWh/bulan
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transport-type">
+                                    <i class="fas fa-car"></i> Transportasi Harian
+                                </label>
+                                <select id="transport-type" aria-label="Jenis transportasi">
+                                    <option value="car">Mobil Pribadi</option>
+                                    <option value="motorcycle">Sepeda Motor</option>
+                                    <option value="public">Transportasi Umum</option>
+                                    <option value="bike">Sepeda/Berjalan</option>
+                                </select>
+                                <div class="input-with-unit">
+                                    <input type="number" id="transport-distance" min="0" step="5" value="20" aria-label="Jarak tempuh harian dalam km">
+                                    <span class="unit">km/hari</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="diet">
+                                    <i class="fas fa-utensils"></i> Pola Makan
+                                </label>
+                                <select id="diet" aria-label="Pola makan">
+                                    <option value="vegetarian">Vegetarian</option>
+                                    <option value="low-meat">Sedikit Daging</option>
+                                    <option value="average" selected>Rata-rata</option>
+                                    <option value="high-meat">Banyak Daging</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="shopping">
+                                    <i class="fas fa-shopping-bag"></i> Belanja Bulanan
+                                </label>
+                                <select id="shopping" aria-label="Frekuensi belanja">
+                                    <option value="minimal">Minimalis</option>
+                                    <option value="moderate" selected>Sedang</option>
+                                    <option value="frequent">Sering</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="waste">
+                                    <i class="fas fa-trash"></i> Sampah yang Dihasilkan
+                                </label>
+                                <select id="waste" aria-label="Jumlah sampah">
+                                    <option value="low">Sedikit (daur ulang aktif)</option>
+                                    <option value="medium" selected>Sedang</option>
+                                    <option value="high">Banyak</option>
+                                </select>
+                            </div>
+
+                            <button class="btn-calculate" onclick="calculateCarbonFootprint()" aria-label="Hitung jejak karbon">
+                                <i class="fas fa-calculator"></i> Hitung Jejak Karbon
+                            </button>
+                        </div>
+
+                        <div class="calc-results" id="personal-results">
+                            <div class="results-placeholder">
+                                <i class="fas fa-chart-pie"></i>
+                                <h4>Hasil Perhitungan</h4>
+                                <p>Klik "Hitung Jejak Karbon" untuk melihat hasil</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Household Calculator -->
+                    <div class="calc-tab-content" id="household-calc">
+                        <div class="calc-form">
+                            <h3><i class="fas fa-home"></i> Jejak Karbon Rumah Tangga</h3>
+                            <p>Hitung jejak karbon total rumah tangga Anda</p>
+                            
+                            <div class="form-group">
+                                <label for="household-members">
+                                    <i class="fas fa-users"></i> Jumlah Anggota Keluarga
+                                </label>
+                                <input type="number" id="household-members" min="1" max="10" value="4" aria-label="Jumlah anggota keluarga">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="house-electricity">
+                                    <i class="fas fa-bolt"></i> Konsumsi Listrik
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="house-electricity" min="0" step="50" value="900" aria-label="Konsumsi listrik rumah tangga dalam kWh">
+                                    <span class="unit">kWh/bulan</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lpg-usage">
+                                    <i class="fas fa-fire"></i> Penggunaan LPG
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="lpg-usage" min="0" step="1" value="3" aria-label="Penggunaan LPG dalam tabung per bulan">
+                                    <span class="unit">tabung/bulan</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="water-usage">
+                                    <i class="fas fa-tint"></i> Konsumsi Air
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="water-usage" min="0" step="10" value="30" aria-label="Konsumsi air dalam meter kubik per bulan">
+                                    <span class="unit">m³/bulan</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="house-waste">
+                                    <i class="fas fa-trash-alt"></i> Produksi Sampah
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="house-waste" min="0" step="0.5" value="2.5" aria-label="Produksi sampah dalam kg per hari">
+                                    <span class="unit">kg/hari</span>
+                                </div>
+                            </div>
+
+                            <button class="btn-calculate" onclick="calculateHouseholdFootprint()" aria-label="Hitung jejak karbon rumah tangga">
+                                <i class="fas fa-calculator"></i> Hitung Jejak Rumah Tangga
+                            </button>
+                        </div>
+
+                        <div class="calc-results" id="household-results">
+                            <div class="results-placeholder">
+                                <i class="fas fa-home"></i>
+                                <h4>Hasil Rumah Tangga</h4>
+                                <p>Klik "Hitung" untuk melihat hasil</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transport Calculator -->
+                    <div class="calc-tab-content" id="transport-calc">
+                        <div class="calc-form">
+                            <h3><i class="fas fa-road"></i> Jejak Karbon Transportasi</h3>
+                            <p>Hitung emisi dari perjalanan Anda</p>
+                            
+                            <div class="transport-modes">
+                                <div class="transport-mode active" data-mode="car" onclick="selectTransportMode('car')" role="button" tabindex="0" aria-label="Pilih transportasi mobil">
+                                    <i class="fas fa-car"></i>
+                                    <span>Mobil</span>
+                                </div>
+                                <div class="transport-mode" data-mode="motorcycle" onclick="selectTransportMode('motorcycle')" role="button" tabindex="0" aria-label="Pilih transportasi motor">
+                                    <i class="fas fa-motorcycle"></i>
+                                    <span>Motor</span>
+                                </div>
+                                <div class="transport-mode" data-mode="public" onclick="selectTransportMode('public')" role="button" tabindex="0" aria-label="Pilih transportasi umum">
+                                    <i class="fas fa-bus"></i>
+                                    <span>Umum</span>
+                                </div>
+                                <div class="transport-mode" data-mode="plane" onclick="selectTransportMode('plane')" role="button" tabindex="0" aria-label="Pilih transportasi pesawat">
+                                    <i class="fas fa-plane"></i>
+                                    <span>Pesawat</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="travel-distance">
+                                    <i class="fas fa-route"></i> Jarak Tempuh Harian
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="travel-distance" min="0" step="5" value="20" aria-label="Jarak tempuh harian dalam km">
+                                    <span class="unit">km</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fuel-type">
+                                    <i class="fas fa-gas-pump"></i> Jenis Bahan Bakar
+                                </label>
+                                <select id="fuel-type" aria-label="Jenis bahan bakar">
+                                    <option value="pertalite">Pertalite</option>
+                                    <option value="pertamax">Pertamax</option>
+                                    <option value="solar">Solar</option>
+                                    <option value="electric">Listrik</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fuel-efficiency">
+                                    <i class="fas fa-tachometer-alt"></i> Efisiensi Bahan Bakar
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="fuel-efficiency" min="1" max="50" value="10" aria-label="Efisiensi bahan bakar dalam km per liter">
+                                    <span class="unit">km/liter</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="travel-days">
+                                    <i class="fas fa-calendar-day"></i> Hari Perjalanan per Minggu
+                                </label>
+                                <input type="range" id="travel-days" min="1" max="7" value="5" aria-label="Hari perjalanan per minggu">
+                                <div class="range-value">
+                                    <span id="days-value">5</span> hari
+                                </div>
+                            </div>
+
+                            <button class="btn-calculate" onclick="calculateTransportFootprint()" aria-label="Hitung emisi transportasi">
+                                <i class="fas fa-calculator"></i> Hitung Emisi Transportasi
+                            </button>
+                        </div>
+
+                        <div class="calc-results" id="transport-results">
+                            <div class="results-placeholder">
+                                <i class="fas fa-road"></i>
+                                <h4>Hasil Transportasi</h4>
+                                <p>Klik "Hitung" untuk melihat hasil</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Energy Calculator -->
+                    <div class="calc-tab-content" id="energy-calc">
+                        <div class="calc-form">
+                            <h3><i class="fas fa-solar-panel"></i> Kalkulator Energi Terbarukan</h3>
+                            <p>Hitung potensi penghematan dengan energi terbarukan</p>
+                            
+                            <div class="energy-options">
+                                <div class="energy-option active" data-energy="solar" onclick="selectEnergyOption('solar')" role="button" tabindex="0" aria-label="Pilih energi surya">
+                                    <i class="fas fa-sun"></i>
+                                    <span>Panel Surya</span>
+                                </div>
+                                <div class="energy-option" data-energy="biogas" onclick="selectEnergyOption('biogas')" role="button" tabindex="0" aria-label="Pilih energi biogas">
+                                    <i class="fas fa-recycle"></i>
+                                    <span>Biogas</span>
+                                </div>
+                                <div class="energy-option" data-energy="microhydro" onclick="selectEnergyOption('microhydro')" role="button" tabindex="0" aria-label="Pilih energi mikrohidro">
+                                    <i class="fas fa-water"></i>
+                                    <span>Mikrohidro</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="current-consumption">
+                                    <i class="fas fa-bolt"></i> Konsumsi Listrik Saat Ini
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="current-consumption" min="100" step="100" value="900" aria-label="Konsumsi listrik saat ini dalam kWh per bulan">
+                                    <span class="unit">kWh/bulan</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="system-size">
+                                    <i class="fas fa-ruler-combined"></i> Ukuran Sistem
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="system-size" min="1" step="0.5" value="3" aria-label="Ukuran sistem energi terbarukan dalam kWp">
+                                    <span class="unit">kWp</span>
+                                </div>
+                                <div class="input-info">
+                                    Untuk rumah 900 kWh/bulan: 3-5 kWp
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="location-sunlight">
+                                    <i class="fas fa-map-marker-alt"></i> Lokasi (Intensitas Matahari)
+                                </label>
+                                <select id="location-sunlight" aria-label="Lokasi intensitas matahari">
+                                    <option value="high">Tinggi (Jawa, Bali)</option>
+                                    <option value="medium" selected>Sedang (Sumatera, Sulawesi)</option>
+                                    <option value="low">Rendah (Papua, Maluku)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="investment-budget">
+                                    <i class="fas fa-money-bill-wave"></i> Anggaran Investasi
+                                </label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="investment-budget" min="10" step="10" value="50" aria-label="Anggaran investasi dalam juta rupiah">
+                                    <span class="unit">Juta Rupiah</span>
+                                </div>
+                            </div>
+
+                            <button class="btn-calculate" onclick="calculateEnergySavings()" aria-label="Hitung potensi penghematan energi">
+                                <i class="fas fa-calculator"></i> Hitung Potensi Penghematan
+                            </button>
+                        </div>
+
+                        <div class="calc-results" id="energy-results">
+                            <div class="results-placeholder">
+                                <i class="fas fa-solar-panel"></i>
+                                <h4>Hasil Perhitungan Energi</h4>
+                                <p>Klik "Hitung" untuk melihat hasil</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carbon Comparison -->
+                <div class="carbon-comparison">
+                    <h4><i class="fas fa-balance-scale"></i> Perbandingan Jejak Karbon</h4>
+                    <div class="comparison-chart" id="comparisonChart">
+                        <canvas id="carbonChart" aria-label="Grafik perbandingan jejak karbon" role="img"></canvas>
+                    </div>
+                    <div class="comparison-stats">
+                        <div class="comparison-stat">
+                            <div class="stat-value" id="userFootprint">0</div>
+                            <div class="stat-label">Jejak Anda (ton/tahun)</div>
+                        </div>
+                        <div class="comparison-stat">
+                            <div class="stat-value">2.4</div>
+                            <div class="stat-label">Rata-rata Indonesia</div>
+                        </div>
+                        <div class="comparison-stat">
+                            <div class="stat-value">4.8</div>
+                            <div class="stat-label">Rata-rata Global</div>
+                        </div>
+                        <div class="comparison-stat">
+                            <div class="stat-value">2.0</div>
+                            <div class="stat-label">Target 2030</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reduction Tips -->
+                <div class="reduction-tips">
+                    <h4><i class="fas fa-lightbulb"></i> Tips Mengurangi Jejak Karbon</h4>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h5>Hemat Energi</h5>
+                            <p>Ganti lampu dengan LED, matikan peralatan saat tidak digunakan</p>
+                            <div class="tip-impact">
+                                <i class="fas fa-leaf"></i>
+                                Kurangi 0.5 ton CO₂/tahun
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <h5>Transportasi</h5>
+                            <p>Gunakan transportasi umum atau kendaraan listrik</p>
+                            <div class="tip-impact">
+                                <i class="fas fa-leaf"></i>
+                                Kurangi 1.2 ton CO₂/tahun
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-recycle"></i>
+                            </div>
+                            <h5>Daur Ulang</h5>
+                            <p>Pisahkan sampah dan daur ulang plastik/kertas</p>
+                            <div class="tip-impact">
+                                <i class="fas fa-leaf"></i>
+                                Kurangi 0.3 ton CO₂/tahun
+                            </div>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">
+                                <i class="fas fa-solar-panel"></i>
+                            </div>
+                            <h5>Energi Terbarukan</h5>
+                            <p>Pasang panel surya untuk kebutuhan listrik</p>
+                            <div class="tip-impact">
+                                <i class="fas fa-leaf"></i>
+                                Kurangi 2.0 ton CO₂/tahun
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- ABOUT -->
-    <section id="tentang" class="section alt about">
-        <div class="about-content">
-            <img src="https://yasinyasintha.com/wp-content/uploads/2020/08/ekowisata-ilustrasi-_150730154106-130.jpg">
-            <div>
-                <h2>Tentang Lestari Nusantara</h2>
-                <p>
-                    Lestari Nusantara hadir sebagai platform yang menghubungkan inovasi energi 
-                    terbarukan dengan budaya Indonesia. Kami membawa semangat berkelanjutan 
-                    melalui perpaduan teknologi dan kearifan lokal.
-                </p>
-                <p>
-                    Misi kami adalah memperkuat desa, memberdayakan masyarakat, dan mengangkat 
-                    kembali budaya Nusantara ke dalam ekosistem energi masa depan.
-                </p>
+    <!-- INTERACTIVE MAP SECTION -->
+    <section id="peta-interaktif" class="section alt">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h2>Peta Interaktif Nusantara</h2>
+                <p class="section-subtitle">Jelajahi sebaran proyek energi terbarukan dan kearifan lokal di seluruh Indonesia</p>
+            </div>
+
+            <div class="map-controls">
+                <div class="map-view-selector">
+                    <button class="view-btn active" onclick="switchMapView('standard')" aria-label="Peta standar">
+                        <i class="fas fa-map"></i> Peta Standar
+                    </button>
+                    <button class="view-btn" onclick="switchMapView('satellite')" aria-label="Peta satelit">
+                        <i class="fas fa-satellite"></i> Satelit
+                    </button>
+                    <button class="view-btn" onclick="switchMapView('heatmap')" aria-label="Peta heatmap">
+                        <i class="fas fa-fire"></i> Heatmap
+                    </button>
+                </div>
+
+                <div class="map-filter-group">
+                    <div class="filter-control">
+                        <label for="map-filter"><i class="fas fa-filter"></i> Filter Data:</label>
+                        <select id="map-filter" onchange="filterMapData()" aria-label="Filter data peta">
+                            <option value="all">Semua Data</option>
+                            <option value="energi">Energi Terbarukan</option>
+                            <option value="kearifan">Kearifan Lokal</option>
+                            <option value="aktif">Proyek Aktif</option>
+                            <option value="rencana">Dalam Perencanaan</option>
+                        </select>
+                    </div>
+
+                    <div class="search-control">
+                        <input type="text" id="map-search" placeholder="Cari lokasi atau proyek..." aria-label="Pencarian lokasi di peta">
+                        <button onclick="searchOnMap()" aria-label="Cari di peta"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div class="map-wrapper">
+                    <div id="indonesiaMap" aria-label="Peta interaktif Indonesia" role="application"></div>
+                    <div class="map-loading" id="mapLoading">
+                        <div class="spinner"></div>
+                        <p>Memuat peta...</p>
+                    </div>
+                </div>
+
+                <div class="map-sidebar">
+                    <div class="sidebar-header">
+                        <h4><i class="fas fa-info-circle"></i> Informasi Peta</h4>
+                        <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+
+                    <div class="sidebar-content">
+                        <div class="map-stats">
+                            <div class="map-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-map-pin"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-number" id="total-markers">0</div>
+                                    <div class="stat-label">Total Lokasi</div>
+                                </div>
+                            </div>
+                            <div class="map-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-number" id="energy-markers">0</div>
+                                    <div class="stat-label">Proyek Energi</div>
+                                </div>
+                            </div>
+                            <div class="map-stat">
+                                <div class="stat-icon">
+                                    <i class="fas fa-seedling"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-number" id="culture-markers">0</div>
+                                    <div class="stat-label">Kearifan Lokal</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="selected-location" id="selectedLocation">
+                            <div class="placeholder">
+                                <i class="fas fa-mouse-pointer"></i>
+                                <p>Klik marker di peta untuk melihat detail</p>
+                            </div>
+                        </div>
+
+                        <div class="legend">
+                            <h5><i class="fas fa-key"></i> Legenda</h5>
+                            <div class="legend-items">
+                                <div class="legend-item">
+                                    <span class="legend-color energi" aria-label="Marker energi terbarukan"></span>
+                                    <span>Energi Terbarukan</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color kearifan" aria-label="Marker kearifan lokal"></span>
+                                    <span>Kearifan Lokal</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color aktif" aria-label="Marker status aktif"></span>
+                                    <span>Status Aktif</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color rencana" aria-label="Marker dalam perencanaan"></span>
+                                    <span>Dalam Perencanaan</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="province-navigation">
+                <h5><i class="fas fa-compass"></i> Navigasi Cepat ke Provinsi</h5>
+                <div class="province-buttons">
+                    <button onclick="zoomToProvince('jawa-barat')" aria-label="Zoom ke Jawa Barat">Jawa Barat</button>
+                    <button onclick="zoomToProvince('jawa-tengah')" aria-label="Zoom ke Jawa Tengah">Jawa Tengah</button>
+                    <button onclick="zoomToProvince('jawa-timur')" aria-label="Zoom ke Jawa Timur">Jawa Timur</button>
+                    <button onclick="zoomToProvince('bali')" aria-label="Zoom ke Bali">Bali</button>
+                    <button onclick="zoomToProvince('sumatera-utara')" aria-label="Zoom ke Sumatera Utara">Sumatera Utara</button>
+                    <button onclick="zoomToProvince('sulawesi-selatan')" aria-label="Zoom ke Sulawesi Selatan">Sulawesi Selatan</button>
+                    <button onclick="zoomToProvince('kalimantan-timur')" aria-label="Zoom ke Kalimantan Timur">Kalimantan Timur</button>
+                    <button onclick="zoomToProvince('papua')" aria-label="Zoom ke Papua">Papua</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ENERGY SECTION -->
+    <section id="energi" class="section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h2>Energi Terbarukan di Nusantara</h2>
+                <p class="section-subtitle">Teknologi ramah lingkungan yang bersinergi dengan alam Indonesia</p>
+            </div>
+
+            <div class="energy-stats">
+                <div class="energy-stat">
+                    <div class="energy-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div class="energy-info">
+                        <h3>35%</h3>
+                        <p>Potensi Energi Surya</p>
+                    </div>
+                </div>
+                <div class="energy-stat">
+                    <div class="energy-icon">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="energy-info">
+                        <h3>75 GW</h3>
+                        <p>Potensi Hidro</p>
+                    </div>
+                </div>
+                <div class="energy-stat">
+                    <div class="energy-icon">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                    <div class="energy-info">
+                        <h3>60 GW</h3>
+                        <p>Potensi Angin</p>
+                    </div>
+                </div>
+                <div class="energy-stat">
+                    <div class="energy-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="energy-info">
+                        <h3>29 GW</h3>
+                        <p>Potensi Panas Bumi</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="energy-calculator">
+                <h4><i class="fas fa-calculator"></i> Kalkulator Potensi Energi</h4>
+                <div class="calc-inputs">
+                    <div class="input-group">
+                        <label for="energy-type">Jenis Energi:</label>
+                        <select id="energy-type" aria-label="Jenis energi terbarukan">
+                            <option value="solar">Tenaga Surya</option>
+                            <option value="hydro">Tenaga Air</option>
+                            <option value="wind">Tenaga Angin</option>
+                            <option value="biomass">Biomassa</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="energy-capacity">Kapasitas (kW):</label>
+                        <input type="number" id="energy-capacity" min="1" value="5" aria-label="Kapasitas energi dalam kW">
+                    </div>
+                    <div class="input-group">
+                        <label for="energy-location">Lokasi:</label>
+                        <select id="energy-location" aria-label="Lokasi proyek">
+                            <option value="java">Jawa</option>
+                            <option value="sumatra">Sumatra</option>
+                            <option value="sulawesi">Sulawesi</option>
+                            <option value="papua">Papua</option>
+                        </select>
+                    </div>
+                    <button class="btn-calc" onclick="calculateEnergyPotential()" aria-label="Hitung potensi energi">
+                        <i class="fas fa-bolt"></i> Hitung Potensi
+                    </button>
+                </div>
+                <div class="calc-results" id="energy-potential-results">
+                    <p>Masukkan data untuk menghitung potensi energi</p>
+                </div>
+            </div>
+
+            <div class="grid" id="energiList">
+                <!-- Energy cards will be loaded by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- WISDOM SECTION -->
+    <section id="kearifan" class="section alt">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <h2>Kearifan Lokal Indonesia</h2>
+                <p class="section-subtitle">Kebijaksanaan turun-temurun dalam menjaga kelestarian alam</p>
+            </div>
+
+            <div class="wisdom-impact">
+                <div class="impact-card">
+                    <div class="impact-icon">
+                        <i class="fas fa-tree"></i>
+                    </div>
+                    <div class="impact-content">
+                        <h4>2.3 Juta Hektar</h4>
+                        <p>Hutan adat yang terlindungi</p>
+                    </div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">
+                        <i class="fas fa-fish"></i>
+                    </div>
+                    <div class="impact-content">
+                        <h4>450+</h4>
+                        <p>Sistem kelautan tradisional</p>
+                    </div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="impact-content">
+                        <h4>1200+</h4>
+                        <p>Sistem irigasi tradisional</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid" id="kearifanList">
+                <!-- Wisdom cards will be loaded by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTRIBUTION SECTION -->
+    <section id="kontribusi" class="section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <h2>Berkontribusi untuk Nusantara</h2>
+                <p class="section-subtitle">Bergabung dalam gerakan menjaga kelestarian Indonesia</p>
+            </div>
+
+            <div class="contribution-calculator">
+                <h4><i class="fas fa-calculator"></i> Kalkulator Kontribusi Lingkungan</h4>
+                <div class="contribution-options">
+                    <div class="contribution-option active" onclick="selectContribution('tree')" role="button" tabindex="0" aria-label="Kontribusi tanam pohon">
+                        <i class="fas fa-tree"></i>
+                        <span>Tanam Pohon</span>
+                    </div>
+                    <div class="contribution-option" onclick="selectContribution('solar')" role="button" tabindex="0" aria-label="Kontribusi panel surya">
+                        <i class="fas fa-solar-panel"></i>
+                        <span>Panel Surya</span>
+                    </div>
+                    <div class="contribution-option" onclick="selectContribution('education')" role="button" tabindex="0" aria-label="Kontribusi edukasi">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Edukasi</span>
+                    </div>
+                    <div class="contribution-option" onclick="selectContribution('cleanup')" role="button" tabindex="0" aria-label="Kontribusi bersih-bersih">
+                        <i class="fas fa-trash-restore"></i>
+                        <span>Bersih-bersih</span>
+                    </div>
+                </div>
+
+                <div class="calculator-inputs">
+                    <div class="input-group">
+                        <label for="contribution-amount">
+                            <i class="fas fa-coins"></i> Jumlah Kontribusi
+                        </label>
+                        <div class="input-with-unit">
+                            <input type="number" id="contribution-amount" min="10000" step="10000" value="100000" aria-label="Jumlah kontribusi dalam rupiah">
+                            <span class="unit">Rp</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="contribution-duration">
+                            <i class="fas fa-calendar-alt"></i> Durasi
+                        </label>
+                        <select id="contribution-duration" aria-label="Durasi kontribusi">
+                            <option value="once">Sekali</option>
+                            <option value="monthly">Bulanan</option>
+                            <option value="yearly">Tahunan</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-calculate" onclick="calculateContributionImpact()" aria-label="Hitung dampak kontribusi">
+                        <i class="fas fa-chart-line"></i> Hitung Dampak
+                    </button>
+                </div>
+
+                <div class="contribution-results" id="contributionResults">
+                    <div class="results-placeholder">
+                        <i class="fas fa-chart-pie"></i>
+                        <p>Hitung dampak kontribusi Anda</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-cards">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h4>Hitung Jejak Karbon</h4>
+                    <p>Ketahui dan kurangi jejak karbon Anda</p>
+                    <button class="btn-action" onclick="scrollToSection('eco-calculator')" aria-label="Mulai hitung jejak karbon">
+                        Mulai Hitung
+                    </button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h4>Jelajahi Peta</h4>
+                    <p>Temukan proyek energi dan kearifan lokal</p>
+                    <button class="btn-action" onclick="scrollToSection('peta-interaktif')" aria-label="Lihat peta interaktif">
+                        Lihat Peta
+                    </button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h4>Jadi Relawan</h4>
+                    <p>Bergabung dalam aksi lingkungan</p>
+                    <button class="btn-action" onclick="openVolunteerForm()" aria-label="Daftar jadi relawan">
+                        Daftar Sekarang
+                    </button>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h4>Sebarkan</h4>
+                    <p>Bagikan pengetahuan lingkungan</p>
+                    <button class="btn-action" onclick="sharePlatform()" aria-label="Bagikan platform">
+                        Bagikan Platform
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEWSLETTER SECTION -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-content">
+                <div class="newsletter-text">
+                    <h3><i class="fas fa-envelope"></i> Dapatkan Update Terbaru</h3>
+                    <p>Berlangganan newsletter untuk mendapatkan informasi tentang energi terbarukan, kearifan lokal, dan tips mengurangi jejak karbon</p>
+                </div>
+                <div class="newsletter-form">
+                    <input type="email" placeholder="Email Anda" id="newsletter-email" aria-label="Email untuk newsletter">
+                    <button onclick="subscribeNewsletter()" aria-label="Berlangganan newsletter">
+                        <i class="fas fa-paper-plane"></i> Berlangganan
+                    </button>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- FOOTER -->
     <footer>
-        <p>© 2025 Lestari Nusantara | Harmoni Energi & Budaya</p>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-leaf"></i> Lestari Nusantara
+                    </div>
+                    <p>Platform energi terbarukan, kearifan lokal, dan kesadaran lingkungan Indonesia</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Kalkulator</h4>
+                    <a href="#eco-calculator" onclick="scrollToSection('eco-calculator')">Jejak Karbon</a>
+                    <a href="#eco-calculator" onclick="switchCalcTab('transport')">Emisi Transportasi</a>
+                    <a href="#eco-calculator" onclick="switchCalcTab('energy')">Potensi Energi</a>
+                    <a href="#kontribusi" onclick="scrollToSection('kontribusi')">Kontribusi Lingkungan</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Eksplorasi</h4>
+                    <a href="#peta-interaktif" onclick="scrollToSection('peta-interaktif')">Peta Interaktif</a>
+                    <a href="#energi" onclick="scrollToSection('energi')">Energi Terbarukan</a>
+                    <a href="#kearifan" onclick="scrollToSection('kearifan')">Kearifan Lokal</a>
+                    <a href="#kontribusi" onclick="scrollToSection('kontribusi')">Berkontribusi</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <p><i class="fas fa-envelope"></i> info@lestarinusantara.id</p>
+                    <p><i class="fas fa-phone"></i> (021) 1234-5678</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Lestari Nusantara. Semua hak dilindungi.</p>
+                <p>Dikembangkan dengan <i class="fas fa-heart"></i> untuk Indonesia berkelanjutan</p>
+            </div>
+        </div>
     </footer>
 
+    <!-- Back to Top Button -->
+    <button id="backToTop" title="Kembali ke atas" aria-label="Kembali ke atas">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()" aria-label="Tutup modal">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Main JavaScript -->
     <script src="script.js"></script>
+    
+    <!-- Initialize after page load -->
+    <script>
+        // Show content after everything is loaded
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    document.body.classList.remove('content-hidden');
+                    
+                    // Initialize animations
+                    if (typeof initImageOptimization === 'function') {
+                        initImageOptimization();
+                    }
+                }, 500);
+            }, 1000);
+        });
+        
+        // Handle errors
+        window.addEventListener('error', function(e) {
+            console.error('Error:', e);
+            document.getElementById('loadingOverlay').innerHTML = `
+                <div style="text-align: center; color: white;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                    <h2>Terjadi Kesalahan</h2>
+                    <p>Silakan refresh halaman atau coba lagi nanti.</p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: white; color: #2e7d32; border: none; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-redo"></i> Refresh Halaman
+                    </button>
+                </div>
+            `;
+        });
+    </script>
 </body>
 </html>
